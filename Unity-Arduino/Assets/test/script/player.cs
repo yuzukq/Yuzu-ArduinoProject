@@ -12,9 +12,11 @@ public class Player : MonoBehaviour
     [SerializeField] private bool invertX = false; // X軸の反転
     [SerializeField] private bool invertY = false; // Y軸の反転
     [SerializeField] private bool invertZ = false; // Z軸の反転
+    [SerializeField] private float sensitivityMultiplier = 2.0f; // 感度調整用の乗数
 
     private SerialPort serialPort;
     private Vector3 targetRotation;
+    private Vector3 initialRotation;
 
     void Start()
     {
@@ -23,6 +25,9 @@ public class Player : MonoBehaviour
             serialPort = new SerialPort(_portName, _baurate);
             serialPort.Open();
             Debug.Log("シリアルポートを開きました");
+            
+            // 初期回転を保存
+            initialRotation = transform.rotation.eulerAngles;
         }
         catch (Exception ex)
         {
@@ -46,17 +51,22 @@ public class Player : MonoBehaviour
                 
                 if (values.Length == 3)
                 {
-                    // アナログ値を角度に変換
-                    float x = Mathf.Lerp(-maxTiltAngle, maxTiltAngle, float.Parse(values[0]) / 1023f);
-                    float y = Mathf.Lerp(-maxTiltAngle, maxTiltAngle, float.Parse(values[1]) / 1023f);
-                    float z = Mathf.Lerp(-maxTiltAngle, maxTiltAngle, float.Parse(values[2]) / 1023f);
+                    // キャリブレーション済みの値を角度に変換
+                    float x = float.Parse(values[0]) * sensitivityMultiplier;
+                    float y = float.Parse(values[1]) * sensitivityMultiplier;
+                    float z = float.Parse(values[2]) * sensitivityMultiplier;
+                    
+                    // 値の範囲を制限
+                    x = Mathf.Clamp(x, -maxTiltAngle, maxTiltAngle);
+                    y = Mathf.Clamp(y, -maxTiltAngle, maxTiltAngle);
+                    z = Mathf.Clamp(z, -maxTiltAngle, maxTiltAngle);
                     
                     // 必要に応じて軸を反転
                     x *= invertX ? -1 : 1;
                     y *= invertY ? -1 : 1;
                     z *= invertZ ? -1 : 1;
                     
-                    targetRotation = new Vector3(x, y, z);
+                    targetRotation = initialRotation + new Vector3(x, y, z);
                     
                     if (debugMode)
                     {
