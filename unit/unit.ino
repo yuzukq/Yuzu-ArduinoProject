@@ -12,14 +12,14 @@ void setup() {
 }
 
 void loop() {
-  int x = analogRead(0);
-  int y = analogRead(1);
-  int z = analogRead(2);
+  int x = 0 ; //analogRead(0);
+  int y = analogRead(1);//ここだけ使う
+  int z = 0; //analogRead(2);
   
   // スイッチの状態を常時モニタリング
   int buttonState = digitalRead(BUTTON_PIN);
-  Serial.print("Switch state: ");
-  Serial.println(buttonState);  // HIGH（1）なら押下、LOW（0）なら未押下
+  //Serial.print("Switch state: ");
+  //Serial.println(buttonState);  // HIGH（1）なら押下、LOW（0）なら未押下
   
   // キャリブレーション
   if (buttonState == HIGH) {
@@ -47,5 +47,5 @@ void loop() {
   String dataString = String(x) + "," + String(y) + "," + String(z);
   Serial.println(dataString);
   
-  delay(100);  // デバッグ出力用: 100ms,実装時:20ms
+  delay(20);  // デバッグ出力用: 100ms,実装時:20ms
 }
